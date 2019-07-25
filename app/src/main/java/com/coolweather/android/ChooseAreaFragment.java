@@ -1,6 +1,7 @@
 package com.coolweather.android;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -41,7 +42,7 @@ public class ChooseAreaFragment extends Fragment {
     public static final String QUERY_TYPE_CITY = "city";
     public static final String QUERY_TYPE_COUNTY = "county";
     public static final String TAG = "ChooseAreaFrag";
-    public static final String ADDRESS_OF_QUERY_SERVER="http://guolin.tech/api/china";
+    public static final String ADDRESS_OF_QUERY_SERVER="https://guolin.tech/api/china";
     private ProgressDialog mProgressDialog;
     private TextView mTitleText;
     private Button mBackButton;
@@ -81,6 +82,12 @@ public class ChooseAreaFragment extends Fragment {
                 } else if (mCurrentLevel == LEVEL_CITY) {
                     mSelectedCity = mCityList.get(position);
                     queryCounties();
+                }else if (mCurrentLevel==LEVEL_COUNTY){
+                    String weatherId=mCountyList.get(position).getWeatherId();
+                    Intent intent=new Intent(getActivity(),WeatherActivity.class);
+                    intent.putExtra("weather_id",weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -161,6 +168,7 @@ public class ChooseAreaFragment extends Fragment {
         HttpUtil.sendOkHttpRequest(addressOfQueryServer, new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                e.printStackTrace();
                 Log.d(TAG, "onFailure: ");
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -173,7 +181,6 @@ public class ChooseAreaFragment extends Fragment {
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                Log.d(TAG, "onResponse: ");
                 String responseText = response.body().string();
                 boolean result = false;
                 if (type.equals(QUERY_TYPE_PROVINCE)) {
